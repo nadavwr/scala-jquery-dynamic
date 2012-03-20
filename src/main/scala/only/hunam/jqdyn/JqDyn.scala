@@ -10,8 +10,13 @@ trait JsExpEval {
     case _ => arg.toString
   }
 
-  protected def eval(cmd: String)(args: Any*): String =
-    cmd + "(" + args.map(wrapArg).reduceLeftOption(_+", "+_).getOrElse("") + ")"
+  protected def eval(cmd: String)(args: Any*): String = {
+    val field = "(.*)_".r
+    cmd match {
+      case field(c) => c
+      case _ => cmd + "(" + args.map(wrapArg).reduceLeftOption(_+", "+_).getOrElse("") + ")"
+    } 
+  }
 }
 
 class JqDyn private[JqDyn] (statement: String) extends Dynamic with JsCmd with JsExpEval {
@@ -20,7 +25,7 @@ class JqDyn private[JqDyn] (statement: String) extends Dynamic with JsCmd with J
 
   def #>(ns: NodeSeq) = applyDynamic("replaceWith")(ns)
   def #>(s: String) = applyDynamic("val")(s)
-
+  
   override def toJsCmd = statement
 }
 
