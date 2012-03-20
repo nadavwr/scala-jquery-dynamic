@@ -9,13 +9,16 @@ trait JsExpEval {
     case ns: NodeSeq => "'" + ns + "'"
     case _ => arg.toString
   }
+  protected def wrapArgs(args: Any*): String =
+    args.map(wrapArg).reduceLeftOption(_+", "+_).getOrElse("")
 
   protected def eval(cmd: String)(args: Any*): String = {
-    val field = "(.*)_".r
-    cmd match {
-      case field(c) => c
-      case _ => cmd + "(" + args.map(wrapArg).reduceLeftOption(_+", "+_).getOrElse("") + ")"
-    } 
+    val cmdExtractor = "(.*[^_])(_)?".r
+    val cmdExtractor(cmdJs, underscore) = cmd
+    val parens = (underscore == null) // parens for noarg expressions unless '_' suffix
+    def parenthesize(s: String) = if (!s.isEmpty || parens) "(" + s + ")" else s
+    val argsJs = wrapArgs(args: _*)
+    cmdJs + parenthesize(argsJs)
   }
 }
 
