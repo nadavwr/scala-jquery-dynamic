@@ -42,4 +42,11 @@ object JqDynSpec extends mutable.Specification {
       ($("test").foo_.bar).toJsCmd must be equalTo("$('test').foo.bar()")
     }
   }
+
+  "Specifying a keyword" should {
+    "succeed, if escaped by '_' suffix" in {
+      ($("test").val_("bar")).toJsCmd must be equalTo("$('test').val('bar')")
+    }
+  }
+
 }
